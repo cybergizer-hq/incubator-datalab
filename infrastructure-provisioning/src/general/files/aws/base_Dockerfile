@@ -30,8 +30,11 @@ RUN	apt-get update && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install any python dependencies
-RUN pip install -UI pip==9.0.3 && \
-    pip install boto3 backoff fabric==1.14.0 fabvenv awscli argparse requests ujson jupyter pycrypto
+RUN pip install -UI pip==9.0.3 qtconsole==4.7.7 pyzmq==18.1.1 ipykernel==4.10.1 pygments==2.5.2 jupyter-client==5.3.5 \
+    traitlets==4.3.3 jupyter-core==4.6.3 tornado==5.1.1 ipython==5.10.0 decorator==4.4.2 setuptools==44.1.1
+RUN pip install comm==0.0.1 Send2Trash==1.5.0 terminado==0.8.3 jsonschema==3.2.0 boto3==1.14.56 backoff==1.10.0 fabric==1.14.1 \
+    pyrsistent==0.16.1 fabvenv awscli==1.16.233 argparse requests ujson jupyter pycrypto singledispatch==3.4.0.3 \
+    backports.functools-lru-cache==1.6.1 cryptography==2.6.1 paramiko==2.4.2
 
 # Configuring ssh for user
 RUN mkdir -p /root/.ssh; echo "Host *" > /root/.ssh/config; \

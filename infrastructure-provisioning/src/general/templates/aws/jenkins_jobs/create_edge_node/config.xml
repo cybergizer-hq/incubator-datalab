@@ -41,7 +41,7 @@ under the License.
           <description>value of the EDGE EC2 instance shape</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>t2.medium</string>
+              <string>t3.medium</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>

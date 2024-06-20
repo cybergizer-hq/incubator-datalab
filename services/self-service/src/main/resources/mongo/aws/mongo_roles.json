@@ -12,12 +12,12 @@
     ]
   },
   {
-    "_id": "nbShapes_t2.medium_fetching",
-    "description": "Use t2.medium instance shape for notebook",
+    "_id": "nbShapes_t3.medium_fetching",
+    "description": "Use t3.medium instance shape for notebook",
     "type": "NOTEBOOK_SHAPE",
     "cloud": "AWS",
     "exploratory_shapes": [
-      "t2.medium"
+      "t3.medium"
     ],
     "groups": [
       "$anyuser"

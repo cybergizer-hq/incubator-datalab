@@ -69,10 +69,11 @@ def ensure_nginx(dlab_path):
 def ensure_jenkins(dlab_path):
     try:
         if not exists(dlab_path + 'tmp/jenkins_ensured'):
-            sudo('wget -q -O - https://pkg.jenkins.io/debian/jenkins-ci.org.key | apt-key add -')
-            sudo('echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list')
+            sudo('wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian/jenkins.io-2023.key')
+            sudo('echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]" https://pkg.jenkins.io/debian binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null')
             manage_pkg('-y update', 'remote', '')
-            manage_pkg('-y install', 'remote', 'jenkins')
+            manage_pkg('-y install', 'remote', 'fontconfig openjdk-8-jre')
+            manage_pkg('-y install', 'remote', 'jenkins=2.220')
             sudo('touch ' + dlab_path + 'tmp/jenkins_ensured')
     except Exception as err:
         traceback.print_exc()
@@ -161,8 +162,8 @@ def ensure_supervisor():
 def ensure_mongo():
     try:
         if not exists(os.environ['ssn_dlab_path'] + 'tmp/mongo_ensured'):
-            sudo('apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927')
-            sudo('ver=`lsb_release -cs`; echo "deb http://repo.mongodb.org/apt/ubuntu $ver/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list; apt-get update')
+            sudo('curl -fsSL https://www.mongodb.org/static/pgp/server-4.4.asc | gpg -o /usr/share/keyrings/mongodb-server-4.4.gpg --dearmor')
+            sudo('ver=`lsb_release -cs`; echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-4.4.gpg ] https://repo.mongodb.org/apt/ubuntu $ver/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list; apt-get update')
             manage_pkg('-y --allow-unauthenticated install', 'remote', 'mongodb-org')
             sudo('systemctl enable mongod.service')
             sudo('touch ' + os.environ['ssn_dlab_path'] + 'tmp/mongo_ensured')
@@ -364,14 +365,14 @@ def start_ss(keyfile, host_string, dlab_conf_dir, web_path,
 def install_build_dep():
     try:
         if not exists('{}tmp/build_dep_ensured'.format(os.environ['ssn_dlab_path'])):
-            maven_version = '3.5.4'
+            maven_version = '3.8.8'
             manage_pkg('-y install', 'remote', 'openjdk-8-jdk git wget unzip')
             with cd('/opt/'):
                 sudo('wget http://mirrors.sonic.net/apache/maven/maven-{0}/{1}/binaries/apache-maven-{1}-bin.zip'.format(
                     maven_version.split('.')[0], maven_version))
                 sudo('unzip apache-maven-{}-bin.zip'.format(maven_version))
                 sudo('mv apache-maven-{} maven'.format(maven_version))
-            sudo('bash -c "curl --silent --location https://deb.nodesource.com/setup_12.x | bash -"')
+            sudo('bash -c "curl --silent --location https://deb.nodesource.com/setup_16.x | bash -"')
             manage_pkg('-y install', 'remote', 'nodejs')
             sudo('npm config set unsafe-perm=true')
             sudo('touch {}tmp/build_dep_ensured'.format(os.environ['ssn_dlab_path']))

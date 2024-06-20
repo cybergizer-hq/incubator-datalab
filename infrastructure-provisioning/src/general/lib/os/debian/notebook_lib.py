@@ -64,7 +64,7 @@ def ensure_r_local_kernel(spark_version, os_user, templates_dir, kernels_dir):
             sudo('\cp -f /tmp/r_template.json {}/ir/kernel.json'.format(kernels_dir))
             sudo('ln -s /opt/spark/ /usr/local/spark')
             try:
-                sudo('cd /usr/local/spark/R/lib/SparkR; R -e "install.packages(\'roxygen2\',repos=\'https://cloud.r-project.org\')" R -e "devtools::check(\'.\')"')
+                sudo('cd /usr/local/spark/R/lib/SparkR; R -e "install.packages(\'https://cran.r-project.org/src/contrib/Archive/roxygen2/roxygen2_6.1.1.tar.gz\', version=\'source\',repos=NULL)"')
             except:
                 pass
             sudo('cd /usr/local/spark/R/lib/SparkR; R -e "devtools::install(\'.\')"')
@@ -76,7 +76,7 @@ def ensure_r_local_kernel(spark_version, os_user, templates_dir, kernels_dir):
 @backoff.on_exception(backoff.expo, SystemExit, max_tries=20)
 def add_marruter_key():
     try:
-        sudo('add-apt-repository -y ppa:marutter/rrutter')
+        sudo('add-apt-repository -y ppa:marutter/rrutter4.0')
     except:
         sys.exit(1)
 
@@ -89,14 +89,15 @@ def ensure_r(os_user, r_libs, region, r_mirror):
                 r_repository = 'https://cloud.r-project.org'
             add_marruter_key()
             sudo('apt update')
-            manage_pkg('-y install', 'remote', 'libcurl4-openssl-dev libssl-dev libreadline-dev')
-            manage_pkg('-y install', 'remote', 'cmake')
+            manage_pkg('-y install', 'remote', 'libcurl4-openssl-dev libreadline-dev libbz2-dev liblzma-dev libtiff5-dev libjpeg-dev')
+            manage_pkg('-y install', 'remote', 'cmake libcurl4-gnutls-dev libfontconfig1-dev libfribidi-dev')
             manage_pkg('-y install', 'remote', 'r-base r-base-dev')
             sudo('R CMD javareconf')
             sudo('cd /root; git clone https://github.com/zeromq/zeromq4-x.git; cd zeromq4-x/; mkdir build; cd build; cmake ..; make install; ldconfig')
             for i in r_libs:
-                sudo('R -e "install.packages(\'{}\',repos=\'{}\')"'.format(i, r_repository))
-            sudo('R -e "library(\'devtools\');install.packages(repos=\'{}\',c(\'rzmq\',\'repr\',\'digest\',\'stringr\',\'RJSONIO\',\'functional\',\'plyr\'))"'.format(r_repository))
+                sudo('R -e "install.packages(\'{}\',dep=TRUE,repos=\'{}\')"'.format(i, r_repository))
+            sudo('R -e "install.packages(\'devtools\', dep=TRUE, repos=\'{}\')"'.format(r_repository))
+            sudo('R -e "library(\'devtools\');install.packages(repos=\'{}\',dep=TRUE,c(\'rzmq\',\'repr\',\'digest\',\'stringr\',\'RJSONIO\',\'functional\',\'plyr\'))"'.format(r_repository))
             try:
                 sudo('R -e "library(\'devtools\');install_github(\'IRkernel/repr\');install_github(\'IRkernel/IRdisplay\');install_github(\'IRkernel/IRkernel\');"')
             except:
@@ -164,14 +165,15 @@ def ensure_matplot(os_user):
 
 @backoff.on_exception(backoff.expo, SystemExit, max_tries=10)
 def add_sbt_key():
-    sudo(
-        'apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 642AC823')
+    sudo('curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo -H gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/scalasbt-release.gpg --import')
+    sudo('sudo chmod 644 /etc/apt/trusted.gpg.d/scalasbt-release.gpg')
 
 def ensure_sbt(os_user):
     if not exists('/home/' + os_user + '/.ensure_dir/sbt_ensured'):
         try:
-            manage_pkg('-y install', 'remote', 'apt-transport-https')
-            sudo('echo "deb https://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list')
+            manage_pkg('-y install', 'remote', 'apt-transport-https curl gnupg')
+            sudo('echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list')
+            sudo('echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | sudo tee /etc/apt/sources.list.d/sbt_old.list')
             add_sbt_key()
             manage_pkg('update', 'remote', '')
             manage_pkg('-y install', 'remote', 'sbt')
@@ -205,8 +207,8 @@ def ensure_additional_python_libs(os_user):
         try:
             manage_pkg('-y install', 'remote', 'libjpeg8-dev zlib1g-dev')
             if os.environ['application'] in ('jupyter', 'zeppelin'):
-                sudo('pip2 install NumPy=={} SciPy pandas Sympy Pillow sklearn --no-cache-dir'.format(os.environ['notebook_numpy_version']))
-                sudo('pip3 install NumPy=={} SciPy pandas Sympy Pillow sklearn --no-cache-dir'.format(os.environ['notebook_numpy_version']))
+                sudo('pip2 install NumPy=={} SciPy pandas Sympy Pillow scikit-learn==0.20.4 --no-cache-dir'.format(os.environ['notebook_numpy_version']))
+                sudo('pip3 install NumPy=={} SciPy pandas Sympy Pillow scikit-learn --no-cache-dir'.format(os.environ['notebook_numpy_version']))
             if os.environ['application'] in ('tensor', 'deeplearning'):
                 sudo('pip2 install opencv-python h5py --no-cache-dir')
                 sudo('pip3 install opencv-python h5py --no-cache-dir')
@@ -262,7 +264,8 @@ def ensure_python3_libraries(os_user):
                      .format(os.environ['notebook_tornado_version'], os.environ['notebook_ipykernel_version']))
             sudo('pip3 install -U pip=={} --no-cache-dir'.format(os.environ['conf_pip_version']))
             sudo('pip3 install boto3 --no-cache-dir')
-            sudo('pip3 install fabvenv fabric-virtualenv future --no-cache-dir')
+            sudo('pip3 install setuptools-rust==0.11.6 bcrypt==3.2.0 --no-cache-dir')
+            sudo('pip3 install paramiko==2.4.2 cryptography==2.6.1 fabric==1.14.1 fabvenv==0.2.1 fabric-virtualenv==0.3.0 future==0.18.2 --no-cache-dir')
             sudo('touch /home/' + os_user + '/.ensure_dir/python3_libraries_ensured')
         except:
             sys.exit(1)
@@ -358,7 +361,7 @@ def install_livy_dependencies_emr(os_user):
 
 def install_nodejs(os_user):
     if not exists('/home/{}/.ensure_dir/nodejs_ensured'.format(os_user)):
-        sudo('curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -')
+        sudo('curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -')
         manage_pkg('-y install', 'remote', 'nodejs')
         sudo('touch /home/{}/.ensure_dir/nodejs_ensured'.format(os_user))
 

@@ -614,9 +614,9 @@ class AWSK8sSourceBuilder(AbstractDeployBuilder):
          .add_int('--ssn_k8s_workers_count', 'Count of K8S workers', default=2,
                   group=('k8s', 'helm_charts'))
          .add_str('--ssn_k8s_masters_shape', 'Shape for SSN K8S masters.',
-                  default='t2.medium', group=('k8s'))
+                  default='t3.medium', group=('k8s'))
          .add_str('--ssn_k8s_workers_shape', 'Shape for SSN K8S workers.',
-                  default='t2.medium', group='k8s')
+                  default='t3.medium', group='k8s')
          .add_int('--ssn_root_volume_size', 'Size of root volume in GB.',
                   default=30, group='k8s')
          .add_str('--subnet_cidr_a',
@@ -988,7 +988,7 @@ class AWSEndpointBuilder(AbstractDeployBuilder):
                   'require creation) for endpoint',
                   default='public', group='endpoint')
          .add_str('--endpoint_instance_shape', 'Instance shape of Endpoint.',
-                  default='t2.medium', group='endpoint')
+                  default='t3.medium', group='endpoint')
          .add_int('--endpoint_volume_size', 'Size of root volume in GB.',
                   default=30, group='endpoint')
          .add_str('--product', 'Product name.', default='dlab',

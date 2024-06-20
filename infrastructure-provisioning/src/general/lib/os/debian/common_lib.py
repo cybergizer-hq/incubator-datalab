@@ -88,6 +88,8 @@ def ensure_pkg(user, requisites='linux-headers-generic python-pip python-dev '
                         print("Updating repositories "
                                 "and installing requested tools: {}".format(requisites))
                         print("Attempt number " + str(count) + " to install requested tools. Max 60 tries.")
+                        sudo('echo "deb http://archive.ubuntu.com/ubuntu/ xenial main universe restricted multiverse" | tee -a /etc/apt/sources.list')
+                        sudo('echo "deb http://archive.ubuntu.com/ubuntu/ xenial-updates main universe restricted multiverse" | tee -a /etc/apt/sources.list')
                         manage_pkg('update', 'remote', '')
                         manage_pkg('-y install', 'remote', requisites)
                         sudo('unattended-upgrades -v')
@@ -109,7 +111,6 @@ def ensure_pkg(user, requisites='linux-headers-generic python-pip python-dev '
 
 def renew_gpg_key():
     try:
-        sudo('mv /etc/apt/trusted.gpg /etc/apt/trusted.bkp')
         sudo('apt-key update')
     except:
         sys.exit(1)

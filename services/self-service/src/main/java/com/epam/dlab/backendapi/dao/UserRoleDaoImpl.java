@@ -178,7 +178,7 @@ public class UserRoleDaoImpl extends BaseDAO implements UserRoleDao {
 
 	private Set<String> getDefaultShapes(CloudProvider cloudProvider) {
 		if (cloudProvider == CloudProvider.AWS) {
-			return Stream.of("nbShapes_t2.medium_fetching", "compShapes_c4.xlarge_fetching")
+			return Stream.of("nbShapes_t3.medium_fetching", "compShapes_c4.xlarge_fetching")
 					.collect(Collectors.toSet());
 		} else if (cloudProvider == CloudProvider.GCP) {
 			return Stream.of("compShapes_n1-standard-2_fetching", "nbShapes_n1-standard-2_fetching")

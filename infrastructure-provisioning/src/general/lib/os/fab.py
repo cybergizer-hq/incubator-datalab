@@ -41,7 +41,7 @@ def ensure_pip(requisites):
             sudo('echo PATH=$PATH:/usr/local/bin/:/opt/spark/bin/ >> /etc/profile')
             sudo('echo export PATH >> /etc/profile')
             sudo('pip install -UI pip=={} --no-cache-dir'.format(os.environ['conf_pip_version']))
-            sudo('pip install --upgrade setuptools')
+            sudo('pip install setuptools==44.1.1')
             sudo('pip install -U {} --no-cache-dir'.format(requisites))
             sudo('touch /home/{}/.ensure_dir/pip_path_added'.format(os.environ['conf_os_user']))
     except:
@@ -57,8 +57,8 @@ def install_pip_pkg(requisites, pip_version, lib_group):
     error_parser = "Could not|No matching|ImportError:|failed|EnvironmentError:"
     try:
         if pip_version == 'pip3' and not exists('/bin/pip3'):
-            sudo('ln -s /bin/pip3.5 /bin/pip3')
-        sudo('{} install -U pip=={} setuptools'.format(pip_version, os.environ['conf_pip_version']))
+            sudo('ln -s /bin/pip3.6 /bin/pip3')
+        sudo('{} install -U pip=={} setuptools==44.1.1'.format(pip_version, os.environ['conf_pip_version']))
         sudo('{} install -U pip=={} --no-cache-dir'.format(pip_version, os.environ['conf_pip_version']))
         sudo('{} install --upgrade pip=={}'.format(pip_version, os.environ['conf_pip_version']))
         for pip_pkg in requisites:
@@ -151,10 +151,11 @@ def put_resource_status(resource, status, dlab_path, os_user, hostname):
 def configure_jupyter(os_user, jupyter_conf_file, templates_dir, jupyter_version, exploratory_name):
     if not exists('/home/' + os_user + '/.ensure_dir/jupyter_ensured'):
         try:
-            sudo('pip2 install notebook==5.7.8 --no-cache-dir')
+            sudo('pip2 install pyrsistent==0.16.1 Send2Trash==1.5.0 terminado==0.8.3 jsonschema==3.2.0 notebook==5.7.8 --no-cache-dir')
+            sudo('pip2 install qtconsole==4.7.7 ipywidgets==7.6.1 comm==0.0.1 --no-cache-dir')
             sudo('pip2 install jupyter --no-cache-dir')
-            sudo('pip3.5 install notebook=={} --no-cache-dir'.format(jupyter_version))
-            sudo('pip3.5 install jupyter --no-cache-dir')
+            sudo('pip3.6 install notebook=={} --no-cache-dir'.format(jupyter_version))
+            sudo('pip3.6 install jupyter --no-cache-dir')
             sudo('rm -rf {}'.format(jupyter_conf_file))
             run('jupyter notebook --generate-config --config {}'.format(jupyter_conf_file))
             with cd('/home/{}'.format(os_user)):
@@ -392,8 +393,8 @@ def install_r_pkg(requisites):
     try:
         for r_pkg in requisites:
             if r_pkg == 'sparklyr':
-                run('sudo -i R -e \'install.packages("{0}", repos="https://cloud.r-project.org", dep=TRUE)\' 2>&1 | tee /tmp/tee.tmp; if ! grep -w -E  "({1})" /tmp/tee.tmp > /tmp/install_{0}.log; then  echo "" > /tmp/install_{0}.log;fi'.format(r_pkg, error_parser))
-            sudo('R -e \'install.packages("{0}", repos="https://cloud.r-project.org", dep=TRUE)\' 2>&1 | tee /tmp/tee.tmp; if ! grep -w -E  "({1})" /tmp/tee.tmp >  /tmp/install_{0}.log; then  echo "" > /tmp/install_{0}.log;fi'.format(r_pkg, error_parser))
+                run('sudo -i R -e \'install.packages("{0}", repos="https://cloud.r-project.org",dep=TRUE)\' 2>&1 | tee /tmp/tee.tmp; if ! grep -w -E  "({1})" /tmp/tee.tmp > /tmp/install_{0}.log; then  echo "" > /tmp/install_{0}.log;fi'.format(r_pkg, error_parser))
+            sudo('R -e \'install.packages("{0}", repos="https://cloud.r-project.org",dep=TRUE)\' 2>&1 | tee /tmp/tee.tmp; if ! grep -w -E  "({1})" /tmp/tee.tmp >  /tmp/install_{0}.log; then  echo "" > /tmp/install_{0}.log;fi'.format(r_pkg, error_parser))
             err = sudo('cat /tmp/install_{0}.log'.format(r_pkg)).replace('"', "'")
             sudo('R -e \'installed.packages()[,c(3:4)]\' | if ! grep -w {0} > /tmp/install_{0}.list; then  echo "" > /tmp/install_{0}.list;fi'.format(r_pkg))
             res = sudo('cat /tmp/install_{0}.list'.format(r_pkg))
@@ -595,10 +596,10 @@ def set_mongo_parameters(client, mongo_parameters):
 
 def install_r_packages(os_user):
     if not exists('/home/' + os_user + '/.ensure_dir/r_packages_ensured'):
-        sudo('R -e "install.packages(\'devtools\', repos = \'https://cloud.r-project.org\')"')
-        sudo('R -e "install.packages(\'knitr\', repos = \'https://cloud.r-project.org\')"')
-        sudo('R -e "install.packages(\'ggplot2\', repos = \'https://cloud.r-project.org\')"')
-        sudo('R -e "install.packages(c(\'devtools\',\'mplot\', \'googleVis\'), '
+        sudo('R -e "install.packages(\'devtools\',dep=TRUE, repos = \'https://cloud.r-project.org\')"')
+        sudo('R -e "install.packages(\'knitr\',dep=TRUE, repos = \'https://cloud.r-project.org\')"')
+        sudo('R -e "install.packages(\'ggplot2\',dep=TRUE, repos = \'https://cloud.r-project.org\')"')
+        sudo('R -e "install.packages(c(\'devtools\',\'mplot\', \'googleVis\'),dep=TRUE, '
              'repos = \'https://cloud.r-project.org\'); require(devtools); install_github(\'ramnathv/rCharts\')"')
         sudo('touch /home/' + os_user + '/.ensure_dir/r_packages_ensured')
 
@@ -623,8 +624,10 @@ def add_breeze_library_local(os_user):
                     {1}jfreechart-{0}.jar'.format('1.0.19', breeze_tmp_dir))
             sudo('wget https://repo1.maven.org/maven2/org/jfree/jcommon/{0}/jcommon-{0}.jar -O \
                     {1}jcommon-{0}.jar'.format('1.0.24', breeze_tmp_dir))
-            sudo('wget --no-check-certificate https://brunelvis.org/jar/spark-kernel-brunel-all-{0}.jar -O \
-                    {1}spark-kernel-brunel-all-{0}.jar'.format('2.3', breeze_tmp_dir))
+            sudo('wget https://github.com/Brunel-Visualization/Brunel/releases/download/v2.3/brunel-all.tar.gz -P /tmp')
+            sudo('mkdir /tmp/brunel-all')
+            sudo('tar -xvzf /tmp/brunel-all.tar.gz -C /tmp/brunel-all')
+            sudo('cp /tmp/brunel-all/java/spark-kernel-brunel-all-2.3.jar {0}/spark-kernel-brunel-all-2.3.jar'.format(breeze_tmp_dir))
             sudo('mv {0}* {1}'.format(breeze_tmp_dir, jars_dir))
             sudo('touch /home/' + os_user + '/.ensure_dir/breeze_local_ensured')
         except:
@@ -749,8 +752,8 @@ def update_pyopenssl_lib(os_user):
     if not exists('/home/{}/.ensure_dir/pyopenssl_updated'.format(os_user)):
         try:
             if exists('/usr/bin/pip3'):
-                sudo('pip3 install -U pyopenssl')
-            sudo('pip2 install -U pyopenssl')
+                sudo('pip3 install -U cryptography==2.6.1 pyopenssl==20.0.0')
+            sudo('pip2 install -U cryptography==2.6.1 pyopenssl==20.0.0')
             sudo('touch /home/{}/.ensure_dir/pyopenssl_updated'.format(os_user))
         except:
             sys.exit(1)

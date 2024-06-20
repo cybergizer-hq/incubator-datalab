@@ -49,7 +49,7 @@ parser.add_argument('--allowed_ip_cidr', type=str, default='', help='Comma-separ
                                                                     'access to the instance')
 parser.add_argument('--key_name', type=str, default='', help='Key name (WITHOUT ".pem")')
 parser.add_argument('--key_path', type=str, default='', help='Key path')
-parser.add_argument('--instance_type', type=str, default='t2.medium', help='Instance shape')
+parser.add_argument('--instance_type', type=str, default='t3.medium', help='Instance shape')
 parser.add_argument('--region', required=True, type=str, default='', help='AWS region name')
 parser.add_argument('--elastic_ip', type=str, default='', help='Elastic IP address')
 parser.add_argument('--network_type', type=str, default='public', help='Network type: public or private')
@@ -1339,7 +1339,7 @@ if __name__ == "__main__":
             configuration[varname] = config.get(section, option)
     groovy_version = '2.5.1'
     nexus_version = '3.15.2-01'
-    maven_version = '3.5.4'
+    maven_version = '3.8.8'
     cuda_version_deeplearning = '8.0'
     cuda_deeplearingn_file_name = 'cuda_8.0.44_linux-run'
     cudnn_version_deeplearning = '6.0'

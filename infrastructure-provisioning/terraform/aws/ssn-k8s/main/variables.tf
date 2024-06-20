@@ -98,10 +98,10 @@ variable "ssn_root_volume_size" {
   default = 30
 }
 variable "ssn_k8s_masters_shape" {
-  default = "t2.medium"
+  default = "t3.medium"
 }
 variable "ssn_k8s_workers_shape" {
-  default = "t2.medium"
+  default = "t3.medium"
 }
 variable "kubernetes_version" {
   default = "1.15.5-00"

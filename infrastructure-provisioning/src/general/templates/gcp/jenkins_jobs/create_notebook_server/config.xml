@@ -54,14 +54,14 @@ under the License.
         <hudson.model.ChoiceParameterDefinition>
           <name>instance_shape</name>
           <description>
-            Test purpose: XS: t2.medium
-            Memory optimized: S: r3.xlarge
-            Memory optimized: M: r3.4xlarge
-            Memory optimized: L: r3.8xlarge
+            Test purpose: XS: t3.medium
+            Memory optimized: S: i3.xlarge
+            Memory optimized: M: i3.2xlarge
+            Memory optimized: L: i3.4xlarge
             GPU optimized: M: g2.2xlarge
-            Compute optimized: S: c4.large
-            Compute optimized: M: c4.2xlarge
-            Compute optimized: L: c4.8xlarge
+            Compute optimized: S: c5.large
+            Compute optimized: M: c5.2xlarge
+            Compute optimized: L: c5a.8xlarge
           </description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">

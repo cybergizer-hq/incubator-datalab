@@ -64,7 +64,7 @@ def install_nginx_lua(edge_ip, nginx_version, keycloak_auth_server_url, keycloak
     try:
         if not os.path.exists('/tmp/nginx_installed'):
             manage_pkg('-y install', 'remote', 'wget')
-            manage_pkg('-y install', 'remote', 'gcc build-essential make automake zlib1g-dev libpcre++-dev libssl-dev git libldap2-dev libc6-dev libgd-dev libgeoip-dev libpcre3-dev apt-utils autoconf liblmdb-dev libtool libxml2-dev libyajl-dev pkgconf liblua5.1-0 liblua5.1-0-dev libreadline-dev libreadline6-dev libtinfo-dev libtool-bin lua5.1 zip readline-doc')
+            manage_pkg('-y install', 'remote', 'gcc build-essential make automake zlib1g-dev libpcre++-dev libssl1.0-dev git libldap2-dev libc6-dev libgd-dev libgeoip-dev libpcre3-dev apt-utils autoconf liblmdb-dev libtool libxml2-dev libyajl-dev pkgconf liblua5.1-0 liblua5.1-0-dev libreadline-dev libtinfo-dev libtool-bin lua5.1 zip readline-doc')
             if os.environ['conf_stepcerts_enabled'] == 'true':
                 sudo('mkdir -p /home/{0}/keys'.format(user))
                 sudo('''bash -c 'echo "{0}" | base64 --decode > /etc/ssl/certs/root_ca.crt' '''.format(
@@ -123,8 +123,8 @@ def install_nginx_lua(edge_ip, nginx_version, keycloak_auth_server_url, keycloak
                 sudo('wget http://luajit.org/download/LuaJIT-2.0.5.tar.gz')
                 sudo('tar -xzf LuaJIT-2.0.5.tar.gz')
 
-                sudo('wget http://keplerproject.github.io/luarocks/releases/luarocks-2.2.2.tar.gz')
-                sudo('tar -xzf luarocks-2.2.2.tar.gz')
+                sudo('wget -O luarocks-2.4.4.tar.gz https://github.com/luarocks/luarocks/archive/refs/tags/v2.4.4.tar.gz')
+                sudo('tar -xzf luarocks-2.4.4.tar.gz')
 
                 sudo('ln -sf nginx-{} nginx'.format(nginx_version))
 
@@ -143,7 +143,7 @@ def install_nginx_lua(edge_ip, nginx_version, keycloak_auth_server_url, keycloak
                 sudo('make')
                 sudo('make install')
 
-            with cd('/tmp/src/luarocks-2.2.2/'):
+            with cd('/tmp/src/luarocks-2.4.4/'):
                 sudo('./configure')
                 sudo('make build')
                 sudo('make install')

@@ -202,7 +202,7 @@ public class CommandExecutorMockTest {
 						"\"conf_service_base_name\":\"usein1120v13\",\"conf_os_family\":\"debian\"," +
 						"\"exploratory_name\":\"useinxz1\",\"application\":\"zeppelin\",\"notebook_image\":\"docker" +
 						".dlab-zeppelin\"," +
-						"\"aws_notebook_instance_type\":\"t2.medium\",\"aws_security_groups_ids\":\"sg-4d42dc35\"}' " +
+						"\"aws_notebook_instance_type\":\"t3.medium\",\"aws_security_groups_ids\":\"sg-4d42dc35\"}' " +
 						"|" +
 						" " +
 						"docker run -i --name user_create_exploratory_useinxz1_1487312574572 " +

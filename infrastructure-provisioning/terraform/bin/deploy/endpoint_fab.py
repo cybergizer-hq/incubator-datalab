@@ -674,7 +674,7 @@ def configure_guacamole():
     try:
         mysql_pass = id_generator()
         conn.sudo('docker run --name guacd --restart unless-stopped -d -p 4822:4822 guacamole/guacd')
-        conn.sudo('docker run --rm guacamole/guacamole /opt/guacamole/bin/initdb.sh --mysql > initdb.sql')
+        conn.sudo('docker run --rm guacamole/guacamole:1.2.0 /opt/guacamole/bin/initdb.sh --mysql > initdb.sql')
         conn.sudo('mkdir /tmp/scripts')
         conn.sudo('cp initdb.sql /tmp/scripts')
         conn.sudo('mkdir -p /opt/mysql')
@@ -692,7 +692,7 @@ def configure_guacamole():
                   .format(mysql_pass))
         conn.sudo("docker run --name guacamole --restart unless-stopped --link guacd:guacd --link guac-mysql:mysql"
                   " -e MYSQL_DATABASE='guacamole' -e MYSQL_USER='guacamole' -e MYSQL_PASSWORD='{}'"
-                  " -d -p 8080:8080 guacamole/guacamole".format(mysql_pass))
+                  " -d -p 8080:8080 guacamole/guacamole:1.2.0".format(mysql_pass))
         # create cronjob for run containers on reboot
         conn.sudo('mkdir -p /opt/dlab/cron')
         conn.sudo('touch /opt/dlab/cron/mysql.sh')
@@ -703,7 +703,7 @@ def configure_guacamole():
         conn.sudo('echo "docker rm guacamole" >> /opt/dlab/cron/mysql.sh')
         conn.sudo("""echo "docker run --name guacamole --restart unless-stopped --link guacd:guacd""" 
                   """ --link guac-mysql:mysql -e MYSQL_DATABASE='guacamole' -e MYSQL_USER='guacamole' """
-                  """-e MYSQL_PASSWORD='{}' -d -p 8080:8080 guacamole/guacamole" >> """
+                  """-e MYSQL_PASSWORD='{}' -d -p 8080:8080 guacamole/guacamole:1.2.0" >> """
                   """/opt/dlab/cron/mysql.sh""".format(mysql_pass))
         conn.sudo('''/bin/bash -c '(crontab -l 2>/dev/null; echo "@reboot sh /opt/dlab/cron/mysql.sh") |''' 
                   ''' crontab - ' ''')
@@ -999,13 +999,13 @@ def init_args():
     parser.add_argument('--branch_name', type=str, default='master')  # change default
     parser.add_argument('--env_os', type=str, default='debian')
     parser.add_argument('--service_base_name', type=str, default='')
-    parser.add_argument('--edge_instence_size', type=str, default='t2.medium')
+    parser.add_argument('--edge_instence_size', type=str, default='t3.medium')
     parser.add_argument('--subnet_id', type=str, default='')
     parser.add_argument('--region', type=str, default='')
     parser.add_argument('--zone', type=str, default='')
     parser.add_argument('--tag_resource_id', type=str, default='user:tag')
     parser.add_argument('--ssn_k8s_sg_id', type=str, default='')
-    parser.add_argument('--ssn_instance_size', type=str, default='t2.large')
+    parser.add_argument('--ssn_instance_size', type=str, default='t3.large')
     parser.add_argument('--vpc2_id', type=str, default='')
     parser.add_argument('--subnet2_id', type=str, default='')
     parser.add_argument('--conf_key_dir', type=str, default='/root/keys/', help='Should end by symbol /')

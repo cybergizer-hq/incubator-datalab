@@ -122,7 +122,7 @@ if __name__ == "__main__":
             traceback.print_exc()
             raise Exception
     except Exception as err:
-        dlab.fab.append_result("Failed creating ssh user 'dlab'.", str(err))
+        dlab.fab.append_result("Failed creating ssh user '{}'.".format(notebook_config['dlab_ssh_user']), str(err))
         dlab.actions_lib.remove_ec2(notebook_config['tag_name'], notebook_config['instance_name'])
         sys.exit(1)
 

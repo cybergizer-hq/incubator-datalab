@@ -37,7 +37,7 @@ parser.add_argument('--keycloak_user', type=str, default='')
 parser.add_argument('--keycloak_user_password', type=str, default='')
 args = parser.parse_args()
 
-keycloak_version = "8.0.1"
+keycloak_version = "11.0.3"
 templates_dir = './infrastructure-provisioning/scripts/deploy_keycloak/templates/'
 external_port = "80"
 internal_port = "8080"
@@ -48,8 +48,7 @@ def ensure_jre_jdk(os_user):
         try:
             sudo('mkdir -p /home/' + os_user + '/.ensure_dir')
             sudo('apt-get update')
-            sudo('apt-get install -y default-jre')
-            sudo('apt-get install -y default-jdk')
+            sudo('apt-get install -y openjdk-8-jdk')
             sudo('touch /home/' + os_user + '/.ensure_dir/jre_jdk_ensured')
         except:
             sys.exit(1)

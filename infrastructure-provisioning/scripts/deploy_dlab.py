@@ -80,7 +80,7 @@ parser.add_argument('--conf_key_name', type=str, default='', help='Admin key nam
 parser.add_argument('--workspace_path', type=str, default='', help='Admin key name (WITHOUT ".pem")')
 parser.add_argument('--conf_tag_resource_id', type=str, default='dlab', help='The name of user tag')
 parser.add_argument('--conf_billing_tag', type=str, default='dlab', help='Billing tag')
-parser.add_argument('--aws_ssn_instance_size', type=str, default='t2.large', help='The SSN instance shape')
+parser.add_argument('--aws_ssn_instance_size', type=str, default='t3.large', help='The SSN instance shape')
 parser.add_argument('--azure_ssn_instance_size', type=str, default='Standard_DS2_v2', help='The SSN instance shape')
 parser.add_argument('--gcp_ssn_instance_size', type=str, default='n1-standard-2', help='The SSN instance shape')
 parser.add_argument('--aws_account_id', type=str, default='', help='The ID of Amazon account')
@@ -145,6 +145,7 @@ parser.add_argument('--conf_stepcerts_kid_password', type=str, default='', help=
 parser.add_argument('--conf_stepcerts_ca_url', type=str, default='', help='Step CA URL')
 parser.add_argument('--action', required=True, type=str, default='', choices=['build', 'deploy', 'create', 'terminate'],
                     help='Available options: build, deploy, create, terminate')
+parser.add_argument('--os_user', type=str, default='root')
 args = parser.parse_args()
 
 
@@ -154,15 +155,16 @@ def generate_docker_command():
     if args.action == 'terminate':
         command.append('sudo docker run -i ')
     else:
-        command.append('sudo docker run -i -v {0}{1}.pem:/root/keys/{1}.pem -v {2}/web_app:/root/web_app '.
-                       format(args.key_path, args.conf_key_name, args.workspace_path))
+        command.append('sudo docker run -i -v {0}{1}.pem:/{2}/keys/{1}.pem -v {3}/web_app:/{2}/web_app '.
+                       format(args.key_path, args.conf_key_name, args.os_user, args.workspace_path))
     if args.conf_cloud_provider == 'azure':
-        command.append('-v {}:/root/azure_auth.json '.format(args.azure_auth_path))
+        command.append('-v {0}:/{1}/azure_auth.json '.format(args.azure_auth_path, args.os_user))
     elif args.conf_cloud_provider == 'gcp':
-        command.append('-v {}:/root/service_account.json '.format(args.gcp_service_account_path))
+        command.append('-v {0}:/{1}/service_account.json '.format(args.gcp_service_account_path, args.os_user))
     if args.ssl_cert_path != '' and args.ssl_key_path != '':
-        command.append('-v {}:/root/certs/dlab.crt -v {}:/root/certs/dlab.key '.format(args.ssl_cert_path,
-                                                                                       args.ssl_key_path))
+        command.append('-v {0}:/{2}/certs/dlab.crt -v {1}:/{2}/certs/dlab.key '.format(args.ssl_cert_path,
+                                                                                       args.ssl_key_path,
+                                                                                       args.os_user))
     attrs = vars(args)
     skipped_parameters = ['action', 'key_path', 'workspace_path', 'gcp_service_account_path', 'ssl_cert_path',
                           'ssl_key_path']
